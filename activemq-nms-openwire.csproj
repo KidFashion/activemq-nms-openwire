@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RootNamespace>Apache.NMS.ActiveMQ</RootNamespace>
+    <DefaultItemExcludes>src\test\**\*.*;Resources\**\*.*;</DefaultItemExcludes>
+    <AssemblyName>Apache.NMS.ActiveMQ</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="src\sandbox\**" />
+    <EmbeddedResource Remove="src\sandbox\**" />
+    <None Remove="src\sandbox\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="submodule\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ionic.Zlib.Core" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="submodule\activemq-nms-api\activemq-nms-api.csproj" />
+  </ItemGroup>
+
+
+</Project>

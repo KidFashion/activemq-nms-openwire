@@ -21,7 +21,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Reflection;
-using System.Runtime.Remoting;
 using Apache.NMS.ActiveMQ.Commands;
 using Apache.NMS.ActiveMQ.Threads;
 using Apache.NMS.ActiveMQ.Transport;

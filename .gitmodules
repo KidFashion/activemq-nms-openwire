@@ -1,0 +1,3 @@
+[submodule "submodule/activemq-nms-api"]
+	path = submodule/activemq-nms-api
+	url = https://github.com/KidFashion/activemq-nms-api

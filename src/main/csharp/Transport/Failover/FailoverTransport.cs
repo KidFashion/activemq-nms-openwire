@@ -25,6 +25,8 @@ using Apache.NMS.ActiveMQ.Commands;
 using Apache.NMS.ActiveMQ.State;
 using Apache.NMS.ActiveMQ.Threads;
 using Apache.NMS.Util;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Apache.NMS.ActiveMQ.Transport.Failover
 {
@@ -850,6 +852,24 @@ namespace Apache.NMS.ActiveMQ.Transport.Failover
             }
         }
 
+        #region UrlCache
+        private ConcurrentBag<Uri> _cacheOfUrls = new ConcurrentBag<Uri>();
+        private Uri lookupInCache(Uri urlToCheck)
+        {
+            var result = (from item in _cacheOfUrls
+                            where CompareUris(urlToCheck, item)
+                            select item).FirstOrDefault();
+        
+            if (result == null)
+            {
+                _cacheOfUrls.Add(urlToCheck); return urlToCheck;
+            }
+            else return result;
+        }
+
+        private IPHostEntryComparer _ipHostComparer = new IPHostEntryComparer();
+        #endregion
+
         public void Add(bool rebalance, Uri[] urisToAdd)
         {
 			bool newUri = false;
@@ -859,8 +879,10 @@ namespace Apache.NMS.ActiveMQ.Transport.Failover
                 {
                     if(!Contains(uri))
                     {
-                        uris.Add(uri);
-						newUri = true;
+                        // Before adding a new URI we should compare it with the cache.
+                        uris.Add(lookupInCache(uri));
+                        //uris.Add(uri);
+                        newUri = true;
                     }
                 }
             }
@@ -1363,8 +1385,10 @@ namespace Apache.NMS.ActiveMQ.Transport.Failover
                     Dictionary<Uri, bool> uriSet = new Dictionary<Uri, bool>();
                     for(int i = 0; i < updatedURIs.Length; i++)
                     {
-                        Uri uri = updatedURIs[i];
-                        if(uri != null)
+                        // Update
+                        Uri uri = lookupInCache(updatedURIs[i]);
+                        //Uri uri = updatedURIs[i];
+                        if (uri != null)
                         {
                             uriSet[uri] = true;
                         }
@@ -1632,6 +1656,7 @@ namespace Apache.NMS.ActiveMQ.Transport.Failover
 			return builder.ToString();
 		}
 
+
 		private bool CompareUris(Uri first, Uri second) 
 		{
 			bool result = false;
@@ -1643,8 +1668,8 @@ namespace Apache.NMS.ActiveMQ.Transport.Failover
 				{
             		firstAddr = Dns.GetHostEntry(first.Host);
             		secondAddr = Dns.GetHostEntry(second.Host);
-
-	                if (firstAddr.Equals(secondAddr)) 
+                    // Bug?
+	                if (_ipHostComparer.Equals(firstAddr,secondAddr)) 
 					{
 						result = true;
 	                }
